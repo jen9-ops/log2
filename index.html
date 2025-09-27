@@ -12,13 +12,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link id="manifest-link" rel="manifest">
+    <meta name="theme-color" content="#4f46e5">
 
     <style>
-        /* Базовые стили */
+        /* Base styles */
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Стили для кастомного скроллбара */
+        /* Custom scrollbar styles */
         .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
         }
@@ -35,7 +36,7 @@
         #event-select-value {
             padding-right: 0.5rem; 
         }
-        /* Стиль для анимации появления записей в логе */
+        /* Log entry animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -43,7 +44,7 @@
         .log-entry, .date-header {
             animation: fadeIn 0.3s ease-out;
         }
-        /* Анимация для модального окна */
+        /* Modal animation */
         @keyframes fadeInModal {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -57,6 +58,10 @@
         }
         .modal-zoom-in {
             animation: zoomInModal 0.2s ease-out;
+        }
+        /* Compass needle smooth transition */
+        #compass-needle {
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
     </style>
 </head>
@@ -109,8 +114,13 @@
                 <div class="flex items-center mb-2">
                     <input id="azimuth-checkbox" type="checkbox" class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500 focus:ring-offset-gray-800">
                     <label for="azimuth-checkbox" class="ml-2 text-sm font-medium text-gray-300">Указать азимут</label>
+                    <button id="open-compass-btn" title="Определить азимут" class="ml-auto p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition hidden disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h8a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.832 15.842A9 9 0 013 12.001M16.168 15.842A9 9 0 0021 12.001M12 4v4m0 4h.01" />
+                        </svg>
+                    </button>
                 </div>
-                <div id="azimuth-container" class="hidden">
+                <div id="azimuth-container" class="mt-2 hidden">
                      <input type="text" id="azimuth-input" class="bg-gray-700/50 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-3 placeholder-gray-500 transition" placeholder="например, 270 или 100-130">
                 </div>
             </div>
@@ -137,12 +147,13 @@
             <div id="log-container" class="mt-6">
                 <div class="flex justify-between items-center mb-4 gap-4">
                         <h2 class="text-lg font-semibold text-white flex-shrink-0 flex items-center gap-2">
-                                <span>Последние события</span>
+                            <span>Последние события</span>
                             <svg id="sync-status-icon" class="w-4 h-4 text-gray-500 hidden" title="Статус синхронизации" fill="currentColor" viewBox="0 0 20 20">
-                                <path id="sync-success" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                <path id="sync-success" class="hidden" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 <path id="sync-loading" class="hidden" d="M10 2a8 8 0 100 16 8 8 0 000-16zM5 10a1 1 0 011-1h1.586l-1.293-1.293a1 1 0 111.414-1.414l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L7.586 11H6a1 1 0 01-1-1zm5 0a1 1 0 011-1h2a1 1 0 110 2h-2a1 1 0 01-1-1z"></path>
                                 <path id="sync-error" class="hidden" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                            </svg>
+                                <path id="sync-offline" class="hidden" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                             </svg>
                         </h2>
                     <div class="flex items-center space-x-2 flex-shrink-0">
                         <button id="install-button" title="Установить приложение" class="text-sm text-gray-400 hover:text-white hover:bg-gray-700 p-2 rounded-lg transition hidden">
@@ -168,6 +179,7 @@
         </div>
     </div>
     
+    <!-- Stats Modal -->
     <div id="stats-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden modal-fade-in">
         <div id="stats-modal-content" class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg border border-gray-700 modal-zoom-in">
             <div class="flex justify-between items-center p-4 border-b border-gray-700">
@@ -178,6 +190,7 @@
         </div>
     </div>
 
+    <!-- Confirm Modal -->
     <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden modal-fade-in">
         <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700 modal-zoom-in p-6 text-center">
             <h3 class="text-lg font-bold text-white mb-4">Подтверждение</h3>
@@ -188,10 +201,37 @@
             </div>
         </div>
     </div>
+    
+    <!-- Compass Modal -->
+    <div id="compass-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden modal-fade-in">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-sm border border-gray-700 modal-zoom-in p-6 text-center">
+            <h3 class="text-lg font-bold text-white mb-4">Компас</h3>
+            <div id="compass-ui" class="relative w-48 h-48 mx-auto mb-4">
+                <div class="w-full h-full rounded-full bg-gray-900/50 flex items-center justify-center">
+                    <svg id="compass-needle" class="w-full h-full absolute" viewBox="0 0 100 100">
+                        <!-- Red North Pointer -->
+                        <polygon points="50,0 60,20 50,15 40,20" fill="#EF4444"/>
+                        <!-- White South Pointer -->
+                        <polygon points="50,100 60,80 50,85 40,80" fill="#E5E7EB"/>
+                    </svg>
+                    <div class="absolute text-white text-xs font-bold" style="transform: translateY(-65px);">N</div>
+                    <div class="absolute text-gray-400 text-xs" style="transform: translateY(65px);">S</div>
+                    <div class="absolute text-gray-400 text-xs" style="transform: translateX(-65px);">W</div>
+                    <div class="absolute text-gray-400 text-xs" style="transform: translateX(65px);">E</div>
+                </div>
+            </div>
+            <div id="compass-heading" class="text-2xl font-mono mb-2 text-white">--°</div>
+            <p id="compass-status" class="text-gray-400 text-sm h-10 mb-4"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="compass-close-btn" class="bg-gray-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-gray-700 transition">Закрыть</button>
+                <button id="compass-set-btn" disabled class="bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 transition disabled:bg-gray-500 disabled:cursor-not-allowed">Установить</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
-        // --- Глобальные переменные ---
+        // --- Global DOM Elements ---
         const shiftInput = document.getElementById('shift-input');
         const positionInput = document.getElementById('position-input');
         const positionGpsStatus = document.getElementById('position-gps-status');
@@ -199,6 +239,7 @@
         const azimuthCheckbox = document.getElementById('azimuth-checkbox');
         const azimuthContainer = document.getElementById('azimuth-container');
         const azimuthInput = document.getElementById('azimuth-input');
+        const openCompassBtn = document.getElementById('open-compass-btn');
         const commentCheckbox = document.getElementById('comment-checkbox');
         const commentContainer = document.getElementById('comment-container');
         const commentInput = document.getElementById('comment-input');
@@ -206,67 +247,75 @@
         const logList = document.getElementById('log-list');
         const clearLogButton = document.getElementById('clear-log-button');
         const statsButton = document.getElementById('stats-button');
-        const statsModal = document.getElementById('stats-modal');
-        const statsModalClose = document.getElementById('stats-modal-close');
-        const statsBody = document.getElementById('stats-body');
         const installButton = document.getElementById('install-button');
         const jsonButton = document.getElementById('json-button');
-        const confirmModal = document.getElementById('confirm-modal');
-        const confirmModalText = document.getElementById('confirm-modal-text');
-        const confirmClearBtn = document.getElementById('confirm-clear-btn');
-        const cancelClearBtn = document.getElementById('cancel-clear-btn');
         const distanceCalculatorWrapper = document.getElementById('distance-calculator-wrapper');
 
-        // --- ПЕРЕМЕННЫЕ ДЛЯ ИНДИКАТОРА СИНХРОНИЗАЦИИ ---
+        // Modals
+        const statsModal = document.getElementById('stats-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        const compassModal = document.getElementById('compass-modal');
+
+        // --- Sync Indicator ---
         const syncStatusIcon = document.getElementById('sync-status-icon');
         const syncPaths = {
             success: syncStatusIcon.querySelector('#sync-success'),
             loading: syncStatusIcon.querySelector('#sync-loading'),
             error: syncStatusIcon.querySelector('#sync-error'),
+            offline: syncStatusIcon.querySelector('#sync-offline'),
         };
         
+        let isSyncing = false;
 
         /**
- * Управляет отображением индикатора синхронизации.
- * @param {'loading' | 'success' | 'error'} status - Текущий статус.
- */
-function setSyncStatus(status) {
-    syncStatusIcon.classList.remove('hidden', 'text-green-500', 'text-yellow-500', 'text-red-500', 'animate-spin');
-    Object.values(syncPaths).forEach(p => p.classList.add('hidden'));
+        * Manages the display of the synchronization indicator.
+        * @param {'loading' | 'success' | 'error' | 'offline' | 'idle'} status - The current status.
+        */
+        function setSyncStatus(status) {
+            syncStatusIcon.classList.add('hidden');
+            Object.values(syncPaths).forEach(p => p.classList.add('hidden'));
 
-    if (status === 'loading') {
-        syncStatusIcon.classList.add('text-yellow-500', 'animate-spin');
-        syncPaths.loading.classList.remove('hidden');
-    } else if (status === 'success') {
-        syncStatusIcon.classList.add('text-green-500');
-        syncPaths.success.classList.remove('hidden');
-    } else if (status === 'error') {
-        syncStatusIcon.classList.add('text-red-500');
-        syncPaths.error.classList.remove('hidden');
-    }
+            if (status === 'idle') return;
+            
+            syncStatusIcon.classList.remove('hidden', 'text-green-500', 'text-yellow-500', 'text-red-500', 'text-gray-500', 'animate-spin');
 
-    // Автоматически скрыть иконку через 3 секунды, если это успех или ошибка
-    if (status === 'success' || status === 'error') {
-        setTimeout(() => syncStatusIcon.classList.add('hidden'), 3000);
-    }
-}
+            if (status === 'loading') {
+                syncStatusIcon.classList.add('text-yellow-500', 'animate-spin');
+                syncPaths.loading.classList.remove('hidden');
+            } else if (status === 'success') {
+                syncStatusIcon.classList.add('text-green-500');
+                syncPaths.success.classList.remove('hidden');
+            } else if (status === 'error') {
+                syncStatusIcon.classList.add('text-red-500');
+                syncPaths.error.classList.remove('hidden');
+            } else if (status === 'offline') {
+                syncStatusIcon.classList.add('text-gray-500');
+                syncPaths.offline.classList.remove('hidden');
+            }
+
+            if (status === 'success' || status === 'error') {
+                setTimeout(() => {
+                    const queue = getSyncQueue();
+                    if (queue.length === 0 && navigator.onLine) {
+                         setSyncStatus('idle');
+                    }
+                }, 3000);
+            }
+        }
         
+        // --- App State and Config ---
         const googleScriptUrl = 'https://script.google.com/macros/s/AKfycbz4cMnOrj_SDm4gJmcr0l1Jwi4SR1WjMiyc4RQlxF0xYdrDl8ytA2p5Z-kItF3mt3GE/exec';
-
-        // --- Структура данных ---
         let appData = { logs: {}, customEvents: [], positions: {} };
         let confirmCallback = null;
         let localDistanceLog = [];
         let deferredPrompt;
         
-        // --- Конфигурация ---
         const MORTAR_TYPES = {
             'Минометный обстрел 82мм': { maxRange: 4000 },
             'Минометный обстрел 120мм': { maxRange: 7100 }
         };
-        const SPEED_OF_SOUND = 343; // м/с
         
-        // --- Управление данными ---
+        // --- Data Management ---
         function saveData() { localStorage.setItem('eventLogData', JSON.stringify(appData)); }
         function loadData() { 
             const data = localStorage.getItem('eventLogData'); 
@@ -274,7 +323,6 @@ function setSyncStatus(status) {
                 const parsedData = JSON.parse(data);
                 appData = { ...{ logs: {}, customEvents: [], positions: {} }, ...parsedData };
             }
-            // Загружаем последние использованные значения
             const lastShift = localStorage.getItem('lastShift');
             if (lastShift) shiftInput.value = lastShift;
 
@@ -286,14 +334,12 @@ function setSyncStatus(status) {
             }
         }
 
-        // --- Утилиты ---
+        // --- Utilities ---
         function stringToColor(str) {
             if (!str || typeof str !== 'string') return 'hsl(0, 0%, 70%)';
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash |= 0;
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
             }
             const hue = Math.abs(hash % 360);
             return `hsl(${hue}, 80%, 70%)`;
@@ -306,7 +352,7 @@ function setSyncStatus(status) {
             return p.innerHTML;
         }
         
-        // --- Геолокация ---
+        // --- Geolocation ---
         function setGpsStatus(status) {
             const svg = positionGpsStatus.querySelector('svg');
             svg.classList.remove('text-gray-500', 'text-yellow-400', 'text-green-400', 'text-red-400', 'animate-pulse');
@@ -353,7 +399,6 @@ function setSyncStatus(status) {
                         };
                         appData.positions[positionName] = location;
                         saveData();
-                        console.log(`GPS for "${positionName}" saved:`, location);
                         setGpsStatus('success');
                     },
                     (error) => {
@@ -368,84 +413,98 @@ function setSyncStatus(status) {
             }
         }
         
-        // --- Синхронизация с Google Sheets ---
-       function sendDataToGoogleSheet(eventData) {
-    if (!googleScriptUrl) return;
-    setSyncStatus('loading'); // 1. Показываем индикатор загрузки перед отправкой
+        // --- GOOGLE SHEETS SYNC QUEUE ---
+        function getSyncQueue() {
+            return JSON.parse(localStorage.getItem('syncQueue') || '[]');
+        }
 
-    const formData = new FormData();
-    formData.append('Timestamp', eventData.timestamp);
-    formData.append('Shift', eventData.shift);
-    formData.append('Position', eventData.position.name);
-    formData.append('Event', eventData.name);
-    formData.append('Azimuth', eventData.azimuth || '');
-    formData.append('Distance', eventData.distance || '');
-    formData.append('Comment', eventData.comment || '');
-    formData.append('Latitude', eventData.position.location ? eventData.position.location.lat : '');
-    formData.append('Longitude', eventData.position.location ? eventData.position.location.lon : '');
-    formData.append('Accuracy', eventData.position.location ? eventData.position.location.accuracy : '');
-    formData.append('DistanceLog', JSON.stringify(eventData.distanceLog));
-    
-    fetch(googleScriptUrl, { method: 'POST', body: formData })
-        .then(res => {
-            // Добавляем проверку на случай, если сервер ответил ошибкой (например, 404 или 500)
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
+        function saveSyncQueue(queue) {
+            localStorage.setItem('syncQueue', JSON.stringify(queue));
+        }
+
+        function addToSyncQueue(action) {
+            const queue = getSyncQueue();
+            queue.push(action);
+            saveSyncQueue(queue);
+            processSyncQueue();
+        }
+
+        async function processSyncQueue() {
+            if (isSyncing || !navigator.onLine) {
+                if (!navigator.onLine) setSyncStatus('offline');
+                return;
             }
-            return res.json();
-        })
-        .then(data => {
-            console.log('Google Sheet response:', data);
-            setSyncStatus('success'); // 2. Показываем индикатор успеха, если все прошло хорошо
-        })
-        .catch(err => {
-            console.error('Google Sheet send error:', err);
-            setSyncStatus('error'); // 3. Показываем индикатор ошибки, если что-то пошло не так
-        });
-}
 
-        function deleteDataFromGoogleSheet(timestamp) {
-    if (!googleScriptUrl) return;
-    setSyncStatus('loading'); // 1. Показываем загрузку
-
-    fetch(`${googleScriptUrl}?action=delete&timestamp=${encodeURIComponent(timestamp)}`)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
+            let queue = getSyncQueue();
+            if (queue.length === 0) {
+                 setSyncStatus('success');
+                 setTimeout(() => setSyncStatus('idle'), 2000);
+                return;
             }
-            return res.json();
-        })
-        .then(data => {
-            console.log('Google Sheet delete response:', data);
-            setSyncStatus('success'); // 2. Показываем успех
-        })
-        .catch(err => {
-            console.error('Google Sheet delete error:', err);
-            setSyncStatus('error'); // 3. Показываем ошибку
-        });
-}
-function clearDataInGoogleSheet(shift, position) {
-    if (!googleScriptUrl) return;
-    setSyncStatus('loading'); // 1. Показываем загрузку
 
-    fetch(`${googleScriptUrl}?action=clear&shift=${encodeURIComponent(shift)}&position=${encodeURIComponent(position)}`)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
+            isSyncing = true;
+            setSyncStatus('loading');
+
+            const action = queue[0];
+
+            try {
+                let response;
+                switch (action.type) {
+                    case 'add':
+                        response = await sendDataToGoogleSheet(action.payload);
+                        break;
+                    case 'delete':
+                        response = await deleteDataFromGoogleSheet(action.payload.timestamp);
+                        break;
+                    case 'clear':
+                        response = await clearDataInGoogleSheet(action.payload.shift, action.payload.position);
+                        break;
+                }
+                
+                queue.shift();
+                saveSyncQueue(queue);
+                isSyncing = false;
+                processSyncQueue();
+            } catch (error) {
+                console.error('Sync failed:', error);
+                setSyncStatus('error');
+                isSyncing = false;
             }
-            return res.json();
-        })
-        .then(data => {
-            console.log('Google Sheet clear response:', data);
-            setSyncStatus('success'); // 2. Показываем успех
-        })
-        .catch(err => {
-            console.error('Google Sheet clear error:', err);
-            setSyncStatus('error'); // 3. Показываем ошибку
-        });
-}
+        }
 
-        // --- Валидация ---
+        async function sendDataToGoogleSheet(eventData) {
+            const formData = new FormData();
+            Object.keys(eventData).forEach(key => {
+                let value = eventData[key];
+                 if (typeof value === 'object' && value !== null) {
+                    value = JSON.stringify(value);
+                }
+                formData.append(key.charAt(0).toUpperCase() + key.slice(1), value);
+            });
+             formData.set('Position', eventData.position.name);
+             formData.set('Latitude', eventData.position.location ? eventData.position.location.lat : '');
+             formData.set('Longitude', eventData.position.location ? eventData.position.location.lon : '');
+             formData.set('Accuracy', eventData.position.location ? eventData.position.location.accuracy : '');
+
+
+            const res = await fetch(googleScriptUrl, { method: 'POST', body: formData });
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        }
+
+        async function deleteDataFromGoogleSheet(timestamp) {
+            const res = await fetch(`${googleScriptUrl}?action=delete&timestamp=${encodeURIComponent(timestamp)}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        }
+
+        async function clearDataInGoogleSheet(shift, position) {
+            const res = await fetch(`${googleScriptUrl}?action=clear&shift=${encodeURIComponent(shift)}&position=${encodeURIComponent(position)}`);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        }
+
+        // --- Validation ---
         function isValidAzimuth(value) {
             if (value.trim() === '') return true;
             const parts = value.split('-').map(p => p.trim());
@@ -473,7 +532,7 @@ function clearDataInGoogleSheet(shift, position) {
             }
         });
         
-        // --- Логика журнала ---
+        // --- Journal Logic ---
         function updateLogButtonState() {
             const shiftSet = shiftInput.value.trim() !== '';
             const positionSet = positionInput.value.trim() !== '';
@@ -490,7 +549,7 @@ function clearDataInGoogleSheet(shift, position) {
             }
             saveData();
             renderLog();
-            deleteDataFromGoogleSheet(timestamp); // Синхронизация удаления
+            addToSyncQueue({ type: 'delete', payload: { timestamp } });
         }
 
         function logEvent() {
@@ -511,9 +570,9 @@ function clearDataInGoogleSheet(shift, position) {
                 name: eventName,
                 shift: shiftName,
                 timestamp: new Date().toISOString(), 
-                azimuth: azimuthValue, 
-                comment: commentValue, 
-                distance: distanceValue || null, 
+                azimuth: azimuthValue || '', 
+                comment: commentValue || '', 
+                distance: distanceValue || '', 
                 distanceLog: localDistanceLog,
                 position: {
                     name: positionName,
@@ -524,9 +583,9 @@ function clearDataInGoogleSheet(shift, position) {
             appData.logs[logKey].push(newEvent);
             saveData();
             renderLog();
-            sendDataToGoogleSheet(newEvent); // Синхронизация добавления
+            addToSyncQueue({ type: 'add', payload: newEvent });
 
-            // Сброс полей
+            // Reset fields
             azimuthInput.value = '';
             azimuthInput.classList.remove('border-red-500');
             azimuthInput.classList.add('border-gray-600');
@@ -555,7 +614,7 @@ function clearDataInGoogleSheet(shift, position) {
                 delete appData.logs[logKey];
                 saveData();
                 renderLog();
-                clearDataInGoogleSheet(shiftName, positionName); // Синхронизация очистки
+                addToSyncQueue({ type: 'clear', payload: { shift: shiftName, position: positionName } });
             }
         }
         
@@ -589,8 +648,8 @@ function clearDataInGoogleSheet(shift, position) {
                 const timestamp = eventDateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const eventColor = stringToColor(event.name);
                 const safeComment = escapeHTML(event.comment);
-                const azimuthHtml = event.azimuth ? `<span class="inline-flex items-center text-sm text-cyan-400"><svg class="w-4 h-4 mr-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>${event.azimuth}°</span>` : '';
-                const distanceHtml = event.distance ? `<span class="inline-flex items-center text-sm text-green-400"><svg class="w-4 h-4 mr-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>~${event.distance} м</span>` : '';
+                const azimuthHtml = event.azimuth ? `<span class="inline-flex items-center text-sm text-cyan-400"><svg class="w-4 h-4 mr-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 110-18 9 9 0 010 18z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m0 10.5V18m-6.364-8.636l1.591 1.591M16.727 16.727l1.591 1.591M3 12h2.25m10.5 0H18m-8.636-6.364l1.591 1.591M16.727 7.273l1.591 1.591"></path></svg>${event.azimuth}°</span>` : '';
+                const distanceHtml = event.distance ? `<span class="inline-flex items-center text-sm text-green-400"><svg class="w-4 h-4 mr-1 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path></svg>~${event.distance} м</span>` : '';
                 const infoHtml = [azimuthHtml, distanceHtml].filter(Boolean).join('<span class="text-gray-600 font-sans mx-2">/</span>');
                 const commentHtml = event.comment ? `<div class="bg-black/20 px-4 py-2 border-t border-gray-700/50"><p class="text-sm text-gray-400 italic whitespace-pre-wrap break-words">${safeComment}</p></div>` : '';
                 
@@ -602,6 +661,7 @@ function clearDataInGoogleSheet(shift, position) {
             logList.scrollTop = 0;
         }
 
+        // --- Event Listeners ---
         shiftInput.addEventListener('input', () => {
             localStorage.setItem('lastShift', shiftInput.value.trim());
             renderLog();
@@ -614,16 +674,34 @@ function clearDataInGoogleSheet(shift, position) {
             updatePositionGpsStatus();
         });
         positionInput.addEventListener('blur', getGPSForPosition);
-
         logEventButton.addEventListener('click', () => logEvent());
         commentCheckbox.addEventListener('change', () => { commentContainer.classList.toggle('hidden', !commentCheckbox.checked); });
         commentInput.addEventListener('input', () => { commentInput.style.height = 'auto'; commentInput.style.height = `${commentInput.scrollHeight}px`; });
 
-        // --- Логика подтверждения ---
+        // --- Confirmation Modal Logic ---
         function showConfirm(message, callback) {
+            const confirmModalText = document.getElementById('confirm-modal-text');
+            const confirmClearBtn = document.getElementById('confirm-clear-btn');
+            const cancelClearBtn = document.getElementById('cancel-clear-btn');
             confirmModalText.textContent = message;
             confirmCallback = callback;
             confirmModal.classList.remove('hidden');
+            
+            const handleConfirm = () => {
+                if (typeof confirmCallback === 'function') {
+                    confirmCallback();
+                }
+                closeConfirm();
+            };
+            const closeConfirm = () => {
+                confirmModal.classList.add('hidden');
+                confirmClearBtn.removeEventListener('click', handleConfirm);
+                cancelClearBtn.removeEventListener('click', closeConfirm);
+                confirmCallback = null;
+            };
+            
+            confirmClearBtn.addEventListener('click', handleConfirm);
+            cancelClearBtn.addEventListener('click', closeConfirm);
         }
 
         clearLogButton.addEventListener('click', () => {
@@ -649,43 +727,20 @@ function clearDataInGoogleSheet(shift, position) {
                 }
             }
         });
-        
-        cancelClearBtn.addEventListener('click', () => { 
-            confirmModal.classList.add('hidden');
-            confirmCallback = null;
-        });
 
-        confirmClearBtn.addEventListener('click', () => { 
-            if (typeof confirmCallback === 'function') {
-                confirmCallback();
-            }
-            confirmModal.classList.add('hidden');
-            confirmCallback = null;
-        });
-
-        confirmModal.addEventListener('click', (e) => { 
-            if(e.target === confirmModal) { 
-                confirmModal.classList.add('hidden');
-                confirmCallback = null;
-            }
-        });
-
-        // --- Логика статистики ---
-        function showStatistics() {
+        // --- Statistics Modal Logic ---
+        statsButton.addEventListener('click', () => {
+            const statsBody = document.getElementById('stats-body');
             statsModal.classList.remove('hidden');
             const shiftName = shiftInput.value.trim();
             const positionName = positionInput.value.trim();
             const logKey = `${shiftName} | ${positionName}`;
 
-            if (!logKey) {
-                statsBody.innerHTML = `<p class="text-gray-400 text-center">Сначала введите смену и позицию.</p>`;
-                return;
-            }
-            const events = appData.logs[logKey] || [];
-            if (events.length === 0) {
+            if (!logKey || !(appData.logs[logKey] || []).length) {
                 statsBody.innerHTML = `<p class="text-gray-400 text-center">Нет данных для анализа.</p>`;
                 return;
             }
+            const events = appData.logs[logKey];
             const totalEvents = events.length;
             const eventCounts = {};
             const uniqueDays = new Set();
@@ -702,20 +757,25 @@ function clearDataInGoogleSheet(shift, position) {
             });
             statsHtml += `</div>`;
             statsBody.innerHTML = statsHtml;
-        }
-        statsButton.addEventListener('click', showStatistics);
-        statsModalClose.addEventListener('click', () => statsModal.classList.add('hidden'));
+        });
+        document.getElementById('stats-modal-close').addEventListener('click', () => statsModal.classList.add('hidden'));
         statsModal.addEventListener('click', (e) => { if (e.target === statsModal) { statsModal.classList.add('hidden'); } });
         
-        // --- Логика JSON ---
-        function exportToJson() {
+        // --- JSON Logic ---
+        jsonButton.addEventListener('click', () => {
             const shiftName = shiftInput.value.trim();
             const positionName = positionInput.value.trim();
             const logKey = `${shiftName} | ${positionName}`;
             const events = appData.logs[logKey];
 
             if (!events || events.length === 0) {
-                alert("Нет данных для экспорта для текущей смены и позиции.");
+                showConfirm("Нет данных для экспорта.", () => {});
+                document.getElementById('confirm-clear-btn').classList.add('hidden');
+                document.getElementById('cancel-clear-btn').textContent = 'OK';
+                document.getElementById('cancel-clear-btn').addEventListener('click', () => {
+                    document.getElementById('confirm-clear-btn').classList.remove('hidden');
+                    document.getElementById('cancel-clear-btn').textContent = 'Отмена';
+                }, { once: true });
                 return;
             }
 
@@ -741,38 +801,117 @@ function clearDataInGoogleSheet(shift, position) {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+        });
+        
+        // --- Weather API Logic ---
+        async function getWeather(lat, lon) {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,wind_direction_10m`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                return {
+                    temperature: data.current.temperature_2m,
+                    windspeed: data.current.wind_speed_10m, // in km/h
+                    winddirection: data.current.wind_direction_10m
+                };
+            } catch (error) {
+                console.error("Failed to fetch weather:", error);
+                return null;
+            }
         }
-        jsonButton.addEventListener('click', exportToJson);
 
-        // --- Логика калькулятора дистанции ---
+        // --- Distance Calculator Logic ---
         let timerStartTime = null;
         let timerInterval = null;
+        let weatherData = null;
 
         function renderDistanceCalculator(eventName) {
             distanceCalculatorWrapper.innerHTML = '';
+            weatherData = null;
             const mortarType = MORTAR_TYPES[eventName];
             if (!mortarType) return;
-            localDistanceLog = []; // Reset log for new calculator
-            const calculatorHtml = `<div class="p-4 bg-gray-900/50 rounded-lg"><label class="block mb-3 text-sm font-medium text-gray-400 uppercase tracking-wider">Калькулятор дистанции</label><div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start"><div><div class="flex items-center gap-2 mb-2"><button id="distance-timer-btn" class="flex-grow bg-teal-600 text-white font-medium text-sm py-2 px-4 rounded-lg hover:bg-teal-700 transition duration-200">Выход</button><button id="clear-distance-log-btn" title="Очистить замеры" class="p-2 text-gray-500 hover:text-white transition"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg></button></div><div id="distance-output" class="text-gray-400 text-xs h-4">Нажмите "Выход" при вспышке...</div></div><div id="distance-log-container" class="bg-black/20 rounded-md p-2 min-h-[60px] max-h-24 overflow-y-auto custom-scrollbar"><ul id="distance-mini-log" class="text-sm font-mono text-gray-400 space-y-1"><li class="p-2 text-center text-gray-500 text-xs">Нет замеров</li></ul></div></div><input type="hidden" id="distance-input"></div>`;
+            localDistanceLog = [];
+            const calculatorHtml = `<div class="p-4 bg-gray-900/50 rounded-lg">
+                <label class="block text-center mb-3 text-sm font-medium text-gray-400 uppercase tracking-wider">Калькулятор дистанции</label>
+                <div id="weather-status" class="text-xs text-center text-gray-400 h-4 mb-2"></div>
+                <div id="weather-display" class="hidden text-xs text-center text-sky-300 mb-2"></div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <button id="distance-timer-btn" class="flex-grow bg-teal-600 text-white font-medium text-sm py-2 px-4 rounded-lg hover:bg-teal-700 transition duration-200">Выход</button>
+                            <button id="clear-distance-log-btn" title="Очистить замеры" class="p-2 text-gray-500 hover:text-white transition">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                            </button>
+                        </div>
+                        <div id="distance-output" class="text-gray-400 text-sm h-5 text-center font-mono">Нажмите "Выход"</div>
+                    </div>
+                    <div id="distance-log-container" class="bg-black/20 rounded-md p-2 min-h-[60px] max-h-24 overflow-y-auto custom-scrollbar">
+                        <ul id="distance-mini-log" class="text-sm font-mono text-gray-400 space-y-1"><li class="p-2 text-center text-gray-500 text-xs">Нет замеров</li></ul>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 text-center">Для учета ветра укажите азимут.</p>
+                <input type="hidden" id="distance-input">
+            </div>`;
             distanceCalculatorWrapper.innerHTML = calculatorHtml;
             const timerBtn = document.getElementById('distance-timer-btn');
             const outputEl = document.getElementById('distance-output');
             const miniLogUl = document.getElementById('distance-mini-log');
             const clearBtn = document.getElementById('clear-distance-log-btn');
             const distanceInput = document.getElementById('distance-input');
+            const weatherStatus = document.getElementById('weather-status');
+            const weatherDisplay = document.getElementById('weather-display');
+
+            const fetchAndApplyWeather = async () => {
+                const positionName = positionInput.value.trim();
+                const location = appData.positions[positionName];
+                if (!location) {
+                    weatherStatus.textContent = "Сохраните GPS для авто-погоды.";
+                    return;
+                }
+                weatherStatus.textContent = "Получение данных о погоде...";
+                weatherDisplay.classList.add('hidden');
+                weatherData = await getWeather(location.lat, location.lon);
+                if (weatherData) {
+                    weatherStatus.textContent = "";
+                    weatherDisplay.innerHTML = `Погода: t° ${weatherData.temperature.toFixed(1)}C, Ветер ${(weatherData.windspeed / 3.6).toFixed(1)} м/с с ${weatherData.winddirection}°`;
+                    weatherDisplay.classList.remove('hidden');
+                } else {
+                    weatherStatus.textContent = "Не удалось получить погоду.";
+                }
+            };
+            
             const renderMiniLog = () => {
-                if(localDistanceLog.length === 0) {
-                    miniLogUl.innerHTML = '<li class="p-2 text-center text-gray-500 text-xs">Нет замеров</li>'; return;
+                if (localDistanceLog.length === 0) {
+                    miniLogUl.innerHTML = '<li class="p-2 text-center text-gray-500 text-xs">Нет замеров</li>';
+                    outputEl.innerHTML = 'Нажмите "Выход"';
+                    distanceInput.value = '';
+                    return;
                 }
                 miniLogUl.innerHTML = '';
+                let totalDistance = 0;
                 localDistanceLog.forEach(log => {
                     const li = document.createElement('li');
-                    li.className = "text-yellow-400 text-center";
-                    li.textContent = `+${log.timeDiff.toFixed(2)}s → ~${log.distance} м`;
+                    li.className = "text-yellow-400 text-center text-xs";
+                    li.textContent = `+${log.timeDiff.toFixed(2)}s → ~${log.distance}м`;
                     miniLogUl.prepend(li);
+                    totalDistance += log.distance;
                 });
+
+                const averageDistance = Math.round(totalDistance / localDistanceLog.length);
+                distanceInput.value = averageDistance;
+                
+                let warningHtml = '';
+                if (averageDistance > mortarType.maxRange) {
+                    warningHtml = `<span title="Дистанция превышает макс. дальность (${mortarType.maxRange}м)" class="text-red-400 inline-flex items-center ml-2"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.21 3.03-1.742 3.03H4.42c-1.532 0-2.492-1.696-1.742-3.03l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 011-1h.008a1 1 0 011 1v3.008a1 1 0 01-1 1h-.008a1 1 0 01-1-1V5z" clip-rule="evenodd"></path></svg></span>`;
+                }
+
+                outputEl.innerHTML = `Среднее: ~${averageDistance}м (${localDistanceLog.length} зам.) ${warningHtml}`;
             };
-            clearBtn.addEventListener('click', () => { localDistanceLog = []; distanceInput.value = ''; renderMiniLog(); });
+
+            clearBtn.addEventListener('click', () => { localDistanceLog = []; renderMiniLog(); });
+            
             timerBtn.addEventListener('click', () => {
                 if (!timerStartTime) {
                     timerStartTime = new Date();
@@ -781,26 +920,45 @@ function clearDataInGoogleSheet(shift, position) {
                     timerBtn.textContent = 'Приход';
                     timerInterval = setInterval(() => {
                         const elapsed = ((new Date() - timerStartTime) / 1000).toFixed(1);
-                        outputEl.innerHTML = `Идет замер: <span class="font-mono text-yellow-400">${elapsed}s</span>`;
+                        outputEl.innerHTML = `Замер: ${elapsed}с`;
                     }, 100);
                 } else {
                     clearInterval(timerInterval);
                     const timeDiff = (new Date() - timerStartTime) / 1000;
-                    const distance = Math.round(timeDiff * SPEED_OF_SOUND);
+                    
+                    const temperature = weatherData ? weatherData.temperature : 15;
+                    const speedOfSoundInAir = 331.3 * Math.sqrt(1 + temperature / 273.15);
+
+                    let effectiveSpeed = speedOfSoundInAir;
+                    const azimuthStr = azimuthInput.value.trim();
+
+                    if (weatherData && azimuthStr) {
+                        let eventAzimuth = parseFloat(azimuthStr.split('-')[0]);
+                        if (!isNaN(eventAzimuth)) {
+                            const windSpeedMS = weatherData.windspeed / 3.6;
+                            const angleDiff = weatherData.winddirection - eventAzimuth;
+                            const angleDiffRad = angleDiff * (Math.PI / 180);
+                            const windComponent = windSpeedMS * Math.cos(angleDiffRad);
+                            effectiveSpeed += windComponent;
+                        }
+                    }
+                    
+                    const distance = Math.round(timeDiff * effectiveSpeed);
                     localDistanceLog.push({ timeDiff, distance });
                     renderMiniLog();
-                    distanceInput.value = distance;
-                    outputEl.innerHTML = 'Результат добавлен в список.';
-                    setTimeout(() => { outputEl.innerHTML = 'Нажмите "Выход" при вспышке...'; }, 2000);
+                    
                     timerStartTime = null;
                     timerBtn.classList.add('bg-teal-600', 'hover:bg-teal-700');
                     timerBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
                     timerBtn.textContent = 'Выход';
                 }
             });
+            
+            // Auto-fetch weather on render
+            fetchAndApplyWeather();
         }
         
-        // --- Логика кастомного выбора события ---
+        // --- Custom Event Selection Logic ---
         const eventSelectContainer = document.getElementById('custom-event-select-container');
         const eventOptionsPanel = document.getElementById('event-options-panel');
         const eventOptionsList = document.getElementById('event-options-list');
@@ -886,29 +1044,122 @@ function clearDataInGoogleSheet(shift, position) {
 
         addEventButton.addEventListener('click', addNewEvent);
         customEventInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addNewEvent(); });
+        
+        // --- Compass Modal Logic ---
+        const compassNeedle = document.getElementById('compass-needle');
+        const compassHeading = document.getElementById('compass-heading');
+        const compassStatus = document.getElementById('compass-status');
+        const compassSetBtn = document.getElementById('compass-set-btn');
+        const compassCloseBtn = document.getElementById('compass-close-btn');
+        let currentHeading = null;
+        let compassDisplayRotation = 0; // For smooth animation
 
-        // --- Инициализация и PWA ---
+        const updateCompass = (event) => {
+            let heading = event.webkitCompassHeading;
+            if (typeof heading === 'undefined' || heading === null) {
+                heading = 360 - event.alpha;
+            }
+            
+            if (heading !== null) {
+                heading = (heading + 360) % 360; // Normalize
+                currentHeading = Math.round(heading);
+
+                // --- Smooth Rotation Logic ---
+                let diff = currentHeading - (compassDisplayRotation % 360);
+                if (diff > 180) { diff -= 360; }
+                if (diff < -180) { diff += 360; }
+                
+                compassDisplayRotation += diff;
+                // --- End Smooth Rotation Logic ---
+
+                compassNeedle.style.transform = `rotate(${compassDisplayRotation}deg)`;
+                compassHeading.textContent = `${currentHeading}°`;
+                if(compassSetBtn.disabled){
+                     compassStatus.textContent = 'Наведите устройство на цель и нажмите "Установить".';
+                     compassSetBtn.disabled = false;
+                }
+            }
+        };
+
+        const startCompassListener = () => { window.addEventListener('deviceorientation', updateCompass); };
+        const stopCompassListener = () => { window.removeEventListener('deviceorientation', updateCompass); };
+
+        const openCompassModal = async () => {
+            compassModal.classList.remove('hidden');
+            compassStatus.textContent = 'Запрос доступа к датчикам...';
+            compassSetBtn.disabled = true;
+            currentHeading = null;
+            compassDisplayRotation = 0; // Reset rotation
+            compassNeedle.style.transition = 'transform 0s'; // Disable transition for reset
+            compassNeedle.style.transform = `rotate(0deg)`;
+            setTimeout(() => { // Re-enable after reset
+                compassNeedle.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+            }, 50);
+            compassHeading.textContent = '--°';
+
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permissionState = await DeviceOrientationEvent.requestPermission();
+                    if (permissionState === 'granted') {
+                        startCompassListener();
+                    } else {
+                        compassStatus.textContent = 'Доступ к датчикам отклонен.';
+                    }
+                } catch (error) {
+                    compassStatus.textContent = 'Ошибка запроса разрешений.';
+                }
+            } else if ('DeviceOrientationEvent' in window) {
+                startCompassListener();
+            } else {
+                 compassStatus.textContent = 'Компас не поддерживается.';
+            }
+        };
+
+        const closeCompassModal = () => {
+            compassModal.classList.add('hidden');
+            stopCompassListener();
+        };
+
+        openCompassBtn.addEventListener('click', openCompassModal);
+        compassCloseBtn.addEventListener('click', closeCompassModal);
+        compassSetBtn.addEventListener('click', () => {
+            if (currentHeading !== null) {
+                azimuthInput.value = currentHeading;
+                azimuthCheckbox.checked = true;
+                azimuthContainer.classList.remove('hidden');
+                azimuthInput.dispatchEvent(new Event('input'));
+                updateLogButtonState();
+            }
+            closeCompassModal();
+        });
+
+        // --- Initialization and PWA ---
         function initialize() {
             const manifest = {
-                "name": "Журнал Событий",
-                "short_name": "Журнал",
-                "start_url": ".",
-                "display": "standalone",
-                "background_color": "#1f2937",
-                "theme_color": "#4f46e5",
+                "name": "Журнал Событий", "short_name": "Журнал", "start_url": ".", "display": "standalone",
+                "background_color": "#111827", "theme_color": "#4f46e5",
                 "icons": [
-                    { "src": "https://placehold.co/192x192/1f2937/ffffff?text=Log", "type": "image/png", "sizes": "192x192" },
-                    { "src": "https://placehold.co/512x512/1f2937/ffffff?text=Log", "type": "image/png", "sizes": "512x512" }
+                    { "src": "https://placehold.co/192x192/111827/ffffff?text=Log", "type": "image/png", "sizes": "192x192" },
+                    { "src": "https://placehold.co/512x512/111827/ffffff?text=Log", "type": "image/png", "sizes": "512x512" }
                 ]
             };
             const manifestString = JSON.stringify(manifest);
             const blob = new Blob([manifestString], {type: 'application/json'});
             const manifestURL = URL.createObjectURL(blob);
             document.querySelector('#manifest-link').setAttribute('href', manifestURL);
+            
+            if (window.isSecureContext && ('DeviceOrientationEvent' in window || (typeof DeviceOrientationEvent.requestPermission === 'function'))) {
+                openCompassBtn.classList.remove('hidden');
+            } else {
+                openCompassBtn.classList.remove('hidden');
+                openCompassBtn.disabled = true;
+                openCompassBtn.title = 'Компас доступен только на HTTPS и поддерживаемых устройствах';
+            }
 
             loadData();
             renderEventOptions();
             updateLogButtonState();
+            processSyncQueue();
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -920,8 +1171,6 @@ function clearDataInGoogleSheet(shift, position) {
         installButton.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
                 deferredPrompt = null;
                 installButton.classList.add('hidden');
             }
@@ -930,18 +1179,17 @@ function clearDataInGoogleSheet(shift, position) {
         window.addEventListener('appinstalled', () => {
             installButton.classList.add('hidden');
             deferredPrompt = null;
-            console.log('PWA was installed');
         });
         
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered')).catch(err => console.log('SW registration failed: ', err));
             });
         }
+        
+        window.addEventListener('online', processSyncQueue);
+        window.addEventListener('offline', () => setSyncStatus('offline'));
+
 
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
